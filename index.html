@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Chat Interface</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background: #f0f0f0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow: hidden;
+        }
+
+        .container {
+            width: 1100px;
+            height: 700px;
+            background: #e6e6e6;
+            border-radius: 20px;
+            display: flex;
+            overflow: hidden;
+            position: relative;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .sidebar {
+            width: 300px;
+            background: #f5f5f5;
+            display: flex;
+            flex-direction: column;
+            border-right: 1px solid #ddd;
+            position: relative;
+            z-index: 1000;
+            transition: transform 0.3s ease;
+        }
+
+        .profile {
+            display: flex;
+            align-items: center;
+            padding: 20px;
+            background: #fff;
+            border-bottom: 1px solid #eee;
+            height: 80px;
+        }
+
+        .profile-pic {
+            width: 40px;
+            height: 40px;
+            background: #000;
+            border-radius: 50%;
+            margin-right: 15px;
+        }
+
+        .scroll-area {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            height: calc(100% - 140px);
+            scrollbar-width: thin;
+            scrollbar-color: #007bff #f5f5f5;
+        }
+
+        .scroll-area::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .scroll-area::-webkit-scrollbar-track {
+            background: #f5f5f5;
+            border-radius: 10px;
+        }
+
+        .scroll-area::-webkit-scrollbar-thumb {
+            background: #007bff;
+            border-radius: 10px;
+        }
+
+        .scroll-area::-webkit-scrollbar-thumb:hover {
+            background: #0056b3;
+        }
+
+        .section-container {
+            background: #fff;
+            border-radius: 12px;
+            overflow: hidden;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+        .section-title {
+            padding: 15px;
+            font-weight: bold;
+            background: #f8f8f8;
+            border-bottom: 1px solid #eee;
+        }
+
+        .section-content {
+            padding: 10px 0;
+            max-height: 250px;
+            overflow-y: auto;
+            scrollbar-width: thin;
+            scrollbar-color: #007bff #f5f5f5;
+        }
+
+        .section-content::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .section-content::-webkit-scrollbar-track {
+            background: #f5f5f5;
+            border-radius: 10px;
+        }
+
+        .section-content::-webkit-scrollbar-thumb {
+            background: #007bff;
+            border-radius: 10px;
+        }
+
+        .section-content::-webkit-scrollbar-thumb:hover {
+            background: #0056b3;
+        }
+
+        .friend-item, .group-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 15px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .friend-item:hover, .group-item:hover {
+            background: #f0f0f0;
+        }
+
+        .friend-pic, .group-pic {
+            width: 35px;
+            height: 35px;
+            background: #000;
+            border-radius: 50%;
+            margin-right: 12px;
+        }
+
+        .settings {
+            padding: 20px;
+            background: #fff;
+            border-top: 1px solid #eee;
+        }
+
+        .chat-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .chat-header {
+            padding: 20px;
+            background: #fff;
+            border-bottom: 1px solid #eee;
+            text-align: center;
+        }
+
+        .messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            background: #f5f5f5;
+            scrollbar-width: thin;
+            scrollbar-color: #007bff #f5f5f5;
+        }
+
+        .messages::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .messages::-webkit-scrollbar-track {
+            background: #f5f5f5;
+            border-radius: 10px;
+        }
+
+        .messages::-webkit-scrollbar-thumb {
+            background: #007bff;
+            border-radius: 10px;
+        }
+
+        .messages::-webkit-scrollbar-thumb:hover {
+            background: #0056b3;
+        }
+
+        .message {
+            max-width: 70%;
+            margin: 8px 0;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .message-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 5px;
+        }
+
+        .message-profile-pic {
+            width: 30px;
+            height: 30px;
+            background: #000;
+            border-radius: 50%;
+        }
+
+        .message-profile-name {
+            font-size: 13px;
+            color: #666;
+        }
+
+        .message-content {
+            padding: 12px;
+            border-radius: 15px;
+            background: #fff;
+        }
+
+        .message.received {
+            margin-right: auto;
+        }
+
+        .message.sent {
+            margin-left: auto;
+            align-items: flex-end;
+        }
+
+        .message.sent .message-header {
+            flex-direction: row-reverse;
+        }
+
+        .message.sent .message-content {
+            background: #007bff;
+            color: #fff;
+        }
+
+        .input-area {
+            padding: 20px;
+            background: #fff;
+            border-top: 1px solid #eee;
+            position: relative;
+        }
+
+        .input-container {
+            display: flex;
+            align-items: center;
+            background: #f5f5f5;
+            border-radius: 25px;
+            padding: 10px 20px;
+        }
+
+        .input-container input {
+            flex: 1;
+            border: none;
+            padding: 10px;
+            background: transparent;
+            outline: none;
+        }
+
+        .send-btn {
+            background: none;
+            border: none;
+            color: #007bff;
+            cursor: pointer;
+            padding: 0 10px;
+            font-size: 20px;
+        }
+
+        .attachment-btn {
+            background: none;
+            border: none;
+            color: #666;
+            cursor: pointer;
+            padding: 0 10px;
+            font-size: 20px;
+        }
+
+        .attachment-menu {
+            display: none;
+            position: absolute;
+            bottom: 80px;
+            left: 20px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            padding: 10px;
+            z-index: 1000;
+        }
+
+        .attachment-menu.active {
+            display: block;
+        }
+
+        .attachment-option {
+            padding: 10px 15px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .attachment-option:hover {
+            background: #f5f5f5;
+            border-radius: 5px;
+        }
+
+        .menu-toggle {
+            display: none;
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 1001;
+            width: 40px;
+            height: 40px;
+            border: none;
+            background: #fff;
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        .overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 999;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                width: 100%;
+                height: 100vh;
+                border-radius: 0;
+            }
+
+            .sidebar {
+                position: fixed;
+                left: -300px;
+                top: 0;
+                bottom: 0;
+                transition: left 0.3s ease;
+            }
+
+            .sidebar.active {
+                left: 0;
+            }
+
+            .menu-toggle {
+                display: block;
+            }
+
+            .overlay.active {
+                display: block;
+            }
+        }
+    </style>
+</head>
+<body>
+    <button class="menu-toggle">☰</button>
+    <div class="overlay"></div>
+
+    <div class="container">
+        <div class="sidebar">
+            <div class="profile">
+                <div class="profile-pic"></div>
+                <span>Your Name</span>
+            </div>
+
+            <div class="scroll-area">
+                <div class="section-container">
+                    <div class="section-title">Friends</div>
+                    <div class="section-content">
+                        <div class="friend-item">
+                            <div class="friend-pic"></div>
+                            <span>Friend 1</span>
+                        </div>
+                        <div class="friend-item">
+                            <div class="friend-pic"></div>
+                            <span>Friend 2</span>
+                        </div>
+                        <div class="friend-item">
+                            <div class="friend-pic"></div>
+                            <span>Friend 3</span>
+                        </div>
+                        <div class="friend-item">
+                            <div class="friend-pic"></div>
+                            <span>Friend 4</span>
+                        </div>
+                        <div class="friend-item">
+                            <div class="friend-pic"></div>
+                            <span>Friend 5</span>
+                        </div>
+                        <div class="friend-item">
+                            <div class="friend-pic"></div>
+                            <span>Friend 6</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section-container">
+                    <div class="section-title">Groups</div>
+                    <div class="section-content">
+                        <div class="group-item">
+                            <div class="group-pic"></div>
+                            <span>Group 1</span>
+                        </div>
+                        <div class="group-item">
+                            <div class="group-pic"></div>
+                            <span>Group 2</span>
+                        </div>
+                        <div class="group-item">
+                            <div class="group-pic"></div>
+                            <span>Group 3</span>
+                        </div>
+                        <div class="group-item">
+                            <div class="group-pic"></div>
+                            <span>Group 4</span>
+                        </div>
+                        <div class="group-item">
+                            <div class="group-pic"></div>
+                            <span>Group 5</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="settings">
+                <a href="#">Settings</a> |
+                <a href="#">Profile</a> |
+                <a href="#">Policy</a>
+            </div>
+        </div>
+
+        <div class="chat-area">
+            <div class="chat-header">
+                Chat with Friend
+            </div>
+
+            <div class="messages">
+                <div class="message received">
+                    <div class="message-header">
+                        <div class="message-profile-pic"></div>
+                        <span class="message-profile-name">Ahmet</span>
+                    </div>
+                    <div class="message-content">
+                        Hello! How are you?
+                    </div>
+                </div>
+                <div class="message sent">
+                    <div class="message-header">
+                        <div class="message-profile-pic"></div>
+                        <span class="message-profile-name">Mehmet</span>
+                    </div>
+                    <div class="message-content">
+                        I'm good, thanks! How about you?
+                    </div>
+                </div>
+            </div>
+
+            <div class="input-area">
+                <div class="input-container">
+                    <button class="attachment-btn">📎</button>
+                    <input type="text" placeholder="Type a message...">
+                    <button class="send-btn">➤</button>
+                </div>
+                <div class="attachment-menu">
+                    <div class="attachment-option">
+                        <span>📷</span>
+                        <span>Fotoğraf</span>
+                    </div>
+                    <div class="attachment-option">
+                        <span>📁</span>
+                        <span>Dosya</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const menuToggle = document.querySelector('.menu-toggle');
+            const sidebar = document.querySelector('.sidebar');
+            const overlay = document.querySelector('.overlay');
+            const attachmentBtn = document.querySelector('.attachment-btn');
+            const attachmentMenu = document.querySelector('.attachment-menu');
+
+            function toggleMenu() {
+                sidebar.classList.toggle('active');
+                overlay.classList.toggle('active');
+            }
+
+            menuToggle.addEventListener('click', toggleMenu);
+            overlay.addEventListener('click', toggleMenu);
+
+            attachmentBtn.addEventListener('click', function() {
+                attachmentMenu.classList.toggle('active');
+            });
+
+            document.addEventListener('click', function(e) {
+                if (!attachmentBtn.contains(e.target) && !attachmentMenu.contains(e.target)) {
+                    attachmentMenu.classList.remove('active');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
